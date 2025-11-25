@@ -15,6 +15,9 @@ export default function LoginPage() {
             <span className="text-xs text-slate-400">
               La meilleure carte, à chaque paiement
             </span>
+             <p className="text-xs text-slate-500">
+              (Apercu UI - Version Beta.)
+        </p>
           </div>
         </div>
 
