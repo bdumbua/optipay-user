@@ -6,6 +6,7 @@ import AppHeader from "../components/AppHeader";
 import { fetchCards } from "@/lib/api";
 import type { Card } from "@/types/domain";
 import AppSidebar from "../components/AppSidebar";
+import AppFooter from "../components/AppFooter";
 
 export default function CardsPage() {
   const [cards, setCards] = useState<Card[]>([]);
@@ -187,6 +188,7 @@ export default function CardsPage() {
           </section>
         </main>
       </div>
+      <AppFooter />
     </div>
   );
 }

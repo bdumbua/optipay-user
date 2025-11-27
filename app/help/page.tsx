@@ -1,5 +1,6 @@
 "use client";
 
+import AppFooter from "../components/AppFooter";
 import AppHeader from "../components/AppHeader";
 import AppSidebar from "../components/AppSidebar";
 
@@ -146,6 +147,7 @@ export default function HelpPage() {
           </section>
         </main>
       </div>
+      <AppFooter />
     </div>
   );
 }

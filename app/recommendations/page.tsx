@@ -5,6 +5,7 @@ import Link from "next/link";
 import AppHeader from "../components/AppHeader";
 import { recommendCard } from "@/lib/api";
 import AppSidebar from "../components/AppSidebar";
+import AppFooter from "../components/AppFooter";
 
 type RecommendationResult = {
   recommendedCardId: number;
@@ -284,6 +285,7 @@ export default function RecommendationsPage() {
           </section>
         </main>
       </div>
+      <AppFooter />
     </div>
   );
 }

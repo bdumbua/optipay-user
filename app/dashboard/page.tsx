@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import AppHeader from "../components/AppHeader";
 import AppSidebar from "../components/AppSidebar";
+import AppFooter from "../components/AppFooter";
 
 type SavingsPoint = {
   cardId: number;
@@ -179,6 +180,7 @@ export default function DashboardPage() {
               </div>
             </section>
           </div>
+          
           {/* ENCARt FORMATIONS FINANCIÈRES */}
           <section className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
             <div>
@@ -205,6 +207,7 @@ export default function DashboardPage() {
 
         </main>
       </div>
+      <AppFooter />
     </div>
   );
 }

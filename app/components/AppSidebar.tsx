@@ -2,14 +2,46 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  CreditCard,
+  ReceiptText,
+  Sparkles,
+  GraduationCap,
+  HelpCircle,
+} from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", label: "Tableau de bord" },
-  { href: "/cards", label: "Mes cartes" },
-  { href: "/transactions", label: "Transactions" },
-  { href: "/recommendations", label: "Recommandations" },
-  { href: "/learning", label: "Formations finances" },
-  { href: "/help", label: "Aide & Support" },
+  {
+    href: "/dashboard",
+    label: "Tableau de bord",
+    icon: LayoutDashboard,
+  },
+  {
+    href: "/cards",
+    label: "Mes cartes",
+    icon: CreditCard,
+  },
+  {
+    href: "/transactions",
+    label: "Transactions",
+    icon: ReceiptText,
+  },
+  {
+    href: "/recommendations",
+    label: "Recommandations",
+    icon: Sparkles,
+  },
+  {
+    href: "/learning",
+    label: "Formations finances",
+    icon: GraduationCap,
+  },
+  {
+    href: "/help",
+    label: "Aide & Support",
+    icon: HelpCircle,
+  },
 ];
 
 export default function AppSidebar() {
@@ -17,11 +49,14 @@ export default function AppSidebar() {
 
   return (
     <nav className="hidden md:flex w-56 flex-col gap-2 text-sm">
-      <div className="text-xs uppercase text-slate-500 mb-1">Navigation</div>
+      <div className="text-xs uppercase text-slate-500 mb-1">
+        Navigation
+      </div>
 
       {navItems.map((item) => {
         const isActive =
           pathname === item.href || pathname.startsWith(item.href + "/");
+        const Icon = item.icon;
 
         return (
           <Link
@@ -36,11 +71,15 @@ export default function AppSidebar() {
           >
             <span
               className={
-                "h-1.5 w-1.5 rounded-full " +
-                (isActive ? "bg-cyan-400" : "bg-slate-600")
+                "flex h-6 w-6 items-center justify-center rounded-lg border " +
+                (isActive
+                  ? "border-cyan-500/60 bg-cyan-500/10"
+                  : "border-slate-700 bg-slate-950")
               }
-            />
-            {item.label}
+            >
+              <Icon className="h-3.5 w-3.5" />
+            </span>
+            <span>{item.label}</span>
           </Link>
         );
       })}

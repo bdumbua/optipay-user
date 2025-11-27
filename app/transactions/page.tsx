@@ -8,6 +8,7 @@ import AppHeader from "../components/AppHeader";
 import { fetchTransactions } from "@/lib/api";
 import type { Transaction } from "@/types/domain";
 import AppSidebar from "../components/AppSidebar";
+import AppFooter from "../components/AppFooter";
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -118,6 +119,7 @@ export default function TransactionsPage() {
           <NewTransactionForm />
         </main>
       </div>
+      <AppFooter />
     </div>
   );
 }
