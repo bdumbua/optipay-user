@@ -13,6 +13,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import AppHeader from "../components/AppHeader";
+import AppSidebar from "../components/AppSidebar";
 
 type SavingsPoint = {
   cardId: number;
@@ -43,29 +44,7 @@ export default function DashboardPage() {
       {/* MAIN LAYOUT */}
       <div className="max-w-6xl mx-auto px-4 py-6 flex gap-6">
         {/* SIDEBAR (même style que /cards et /transactions) */}
-        <nav className="hidden md:flex w-56 flex-col gap-2 text-sm">
-          <div className="text-xs uppercase text-slate-500 mb-1">
-            Navigation
-          </div>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 text-cyan-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-            Tableau de bord
-          </div>
-          <Link
-            href="/cards"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-900"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
-            Mes cartes
-          </Link>
-          <Link
-            href="/transactions"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-900"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
-            Transactions
-          </Link>
-        </nav>
+        <AppSidebar />
 
         {/* MAIN CONTENT */}
         <main className="flex-1 flex flex-col gap-4">
@@ -200,6 +179,30 @@ export default function DashboardPage() {
               </div>
             </section>
           </div>
+          {/* ENCARt FORMATIONS FINANCIÈRES */}
+          <section className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
+            <div>
+              <h2 className="text-base font-semibold">
+                Se former en finances personnelles
+              </h2>
+              <p className="text-slate-400 mt-1">
+                Découvrez des contenus textes et vidéos pour mieux gérer votre
+                budget, vos cartes de crédit et vos dettes.
+              </p>
+            </div>
+            <div className="flex flex-col sm:items-end gap-2">
+              <a
+                href="/learning"
+                className="px-4 py-2 rounded-xl bg-cyan-400 text-slate-950 text-sm font-medium hover:bg-cyan-300"
+              >
+                Voir les formations
+              </a>
+              <p className="text-[11px] text-slate-500">
+                Bientôt accompagné par l&apos;assistant IA OptiPay.
+              </p>
+            </div>
+          </section>
+
         </main>
       </div>
     </div>

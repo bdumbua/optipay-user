@@ -32,3 +32,21 @@ export async function fetchTransactions(
   // adapte le chemin si ton controller expose autre chose
   return apiFetch(`/api/transactions?userId=${userId}`);
 }
+
+export async function recommendCard(payload: {
+  userId: number;
+  amountCad: number;
+  mcc: string;
+  country: string;
+  channel: "ONLINE" | "IN_STORE";
+}): Promise<{
+  recommendedCardId: number;
+  reason: string;
+  score?: number;
+  alternatives?: { cardId: number; score: number }[];
+}> {
+  return apiFetch(`/api/recommendations`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}

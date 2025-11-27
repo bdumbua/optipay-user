@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import { fetchCards } from "@/lib/api";
 import type { Card } from "@/types/domain";
+import AppSidebar from "../components/AppSidebar";
 
 export default function CardsPage() {
   const [cards, setCards] = useState<Card[]>([]);
@@ -30,29 +31,7 @@ export default function CardsPage() {
       {/* MAIN LAYOUT */}
       <div className="max-w-6xl mx-auto px-4 py-6 flex gap-6">
         {/* SIDEBAR */}
-        <nav className="hidden md:flex w-56 flex-col gap-2 text-sm">
-          <div className="text-xs uppercase text-slate-500 mb-1">
-            Navigation
-          </div>
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-900"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
-            Tableau de bord
-          </Link>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 text-cyan-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-            Mes cartes
-          </div>
-          <Link
-            href="/transactions"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-900"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
-            Transactions
-          </Link>
-        </nav>
+       <AppSidebar />
 
         {/* MAIN CONTENT */}
         <main className="flex-1 flex flex-col gap-4">
