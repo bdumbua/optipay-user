@@ -19,6 +19,7 @@ export interface Transaction {
 
 export interface Card {
   id: number;
+  userId: number; 
   name: string;
   bank: string;
   network: string;            // "VISA", "MC", "AMEX", etc.
