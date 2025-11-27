@@ -1,9 +1,8 @@
-// app/dashboard/page.tsx
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import CardPickerSection from "../components/CardPickerSection";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   ResponsiveContainer,
   BarChart,
@@ -13,6 +12,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import AppHeader from "../components/AppHeader";
 
 type SavingsPoint = {
   cardId: number;
@@ -21,11 +21,9 @@ type SavingsPoint = {
 };
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [userName, setUserName] = useState<string>("");
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
 
-  // Données mockées : gains moyens par carte
+  // Données mockées : gains moyens par carte (pour le MVP)
   const savingsData: SavingsPoint[] = [
     { cardId: 1, cardName: "Visa Infinite TD", saved: 12.3 },
     { cardId: 2, cardName: "Amex Cobalt", saved: 18.7 },
@@ -37,81 +35,36 @@ export default function DashboardPage() {
       ? savingsData.filter((s) => s.cardId === selectedCardId)
       : savingsData;
 
-  useEffect(() => {
-    const email = localStorage.getItem("optipay_user_email");
-    if (email) {
-      const namePart = email.split("@")[0];
-      const prettyName =
-        namePart.charAt(0).toUpperCase() + namePart.slice(1);
-      setUserName(prettyName);
-    } else {
-      setUserName("Alex");
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("optipay_user_email");
-    router.push("/login");
-  };
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
-      {/* HEADER */}
-      <header className="border-b border-slate-800">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-cyan-400 flex items-center justify-center font-bold text-slate-900">
-              O
-            </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-lg">OptiPay</span>
-              <span className="text-xs text-slate-400">
-                La carte virtuelle, propulsée par l’IA
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-slate-400 hidden sm:inline">
-              Bonjour, {userName || "Alex"}
-            </span>
-            <button className="px-3 py-1 rounded-lg border border-slate-700 text-xs hover:bg-slate-800">
-              Mon compte
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-3 py-1 rounded-lg bg-slate-800 text-xs hover:bg-slate-700"
-            >
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* HEADER harmonisé */}
+      <AppHeader />
 
       {/* MAIN LAYOUT */}
       <div className="max-w-6xl mx-auto px-4 py-6 flex gap-6">
-        {/* SIDEBAR */}
+        {/* SIDEBAR (même style que /cards et /transactions) */}
         <nav className="hidden md:flex w-56 flex-col gap-2 text-sm">
           <div className="text-xs uppercase text-slate-500 mb-1">
             Navigation
           </div>
-          <a className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 text-cyan-300">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 text-cyan-300">
             <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
             Tableau de bord
-          </a>
-          <a
+          </div>
+          <Link
             href="/cards"
             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-900"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
             Mes cartes
-          </a>
-          <a
+          </Link>
+          <Link
             href="/transactions"
             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-900"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
             Transactions
-          </a>
+          </Link>
         </nav>
 
         {/* MAIN CONTENT */}
@@ -128,18 +81,18 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <a
+              <Link
                 href="/transactions"
                 className="px-4 py-2 rounded-xl bg-cyan-400 text-slate-950 text-sm font-medium hover:bg-cyan-300"
               >
                 Nouvelle transaction
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/cards"
                 className="px-4 py-2 rounded-xl border border-slate-700 text-sm hover:bg-slate-800"
               >
                 Ajouter une carte
-              </a>
+              </Link>
             </div>
           </section>
 
@@ -151,7 +104,7 @@ export default function DashboardPage() {
 
           {/* GRILLE : recommandations + graphe */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* DERNIÈRES RECOMMANDATIONS */}
+            {/* DERNIÈRES RECOMMANDATIONS (mock pour MVP) */}
             <section className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-sm">
               <h2 className="text-base font-semibold mb-3">
                 Dernières recommandations
@@ -199,7 +152,7 @@ export default function DashboardPage() {
               </ul>
             </section>
 
-            {/* GRAPHE DES ÉCONOMIES PAR CARTE */}
+            {/* GRAPHE DES ÉCONOMIES PAR CARTE (mocké pour l'instant) */}
             <section className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-sm">
               <div className="flex items-center justify-between mb-3 gap-2">
                 <h2 className="text-base font-semibold">

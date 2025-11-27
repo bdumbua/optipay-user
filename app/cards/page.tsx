@@ -1,36 +1,31 @@
-// app/cards/page.tsx
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import AppHeader from "../components/AppHeader";
+import { fetchCards } from "@/lib/api";
+import type { Card } from "@/types/domain";
 
 export default function CardsPage() {
+  const [cards, setCards] = useState<Card[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // MVP : userId fixé à 1 (toutes tes cartes mockées sont pour userId=1)
+  // plus tard -> on utilisera l'ID réel issu de l'auth (Auth0 / JWT)
+  const userId = 1;
+
+  useEffect(() => {
+    fetchCards(userId)
+      .then(setCards)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [userId]);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
       {/* HEADER */}
-      <header className="border-b border-slate-800">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-cyan-400 flex items-center justify-center font-bold text-slate-900">
-              O
-            </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-lg">OptiPay</span>
-              <span className="text-xs text-slate-400">
-                La carte virtuelle, propulsée par l’IA
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-slate-400 hidden sm:inline">
-              Bonjour, Alex
-            </span>
-            <button className="px-3 py-1 rounded-lg border border-slate-700 text-xs hover:bg-slate-800">
-              Mon compte
-            </button>
-            <button className="px-3 py-1 rounded-lg bg-slate-800 text-xs hover:bg-slate-700">
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       {/* MAIN LAYOUT */}
       <div className="max-w-6xl mx-auto px-4 py-6 flex gap-6">
@@ -77,52 +72,65 @@ export default function CardsPage() {
             </a>
           </section>
 
-          {/* LISTE DES CARTES (statique pour la beta) */}
+          {/* LISTE DES CARTES (dynamique) */}
           <section className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-sm">
             <h2 className="text-base font-semibold mb-3">Cartes enregistrées</h2>
 
-            <div className="space-y-3">
-              {/* Carte 1 (exemple) */}
-              <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/50 p-3">
-                <div>
-                  <div className="font-medium text-slate-100">
-                    Visa Infinite TD
-                  </div>
-                  <div className="text-xs text-slate-400">
-                    Banque : TD • Réseau : Visa • Cashback 3% épicerie
-                  </div>
-                </div>
-                <div className="flex gap-2 text-xs">
-                  <button className="px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-900">
-                    Modifier
-                  </button>
-                  <button className="px-3 py-1 rounded-lg border border-rose-700 text-rose-300 hover:bg-rose-950/40">
-                    Supprimer
-                  </button>
-                </div>
-              </div>
+            {loading && (
+              <p className="text-sm text-slate-400">Chargement des cartes…</p>
+            )}
 
-              {/* Carte 2 (exemple) */}
-              <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/50 p-3">
-                <div>
-                  <div className="font-medium text-slate-100">Amex Cobalt</div>
-                  <div className="text-xs text-slate-400">
-                    Banque : Amex • Réseau : Amex • 5x points restaurants
-                  </div>
-                </div>
-                <div className="flex gap-2 text-xs">
-                  <button className="px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-900">
-                    Modifier
-                  </button>
-                  <button className="px-3 py-1 rounded-lg border border-rose-700 text-rose-300 hover:bg-rose-950/40">
-                    Supprimer
-                  </button>
-                </div>
+            {error && (
+              <p className="text-sm text-rose-300">
+                Erreur lors du chargement des cartes : {error}
+              </p>
+            )}
+
+            {!loading && !error && (
+              <div className="space-y-3">
+                {cards.length > 0 ? (
+                  cards.map((card) => (
+                    <div
+                      key={card.id}
+                      className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/50 p-3"
+                    >
+                      <div>
+                        <div className="font-medium text-slate-100">
+                          {card.name}
+                        </div>
+                        <div className="text-xs text-slate-400">
+                          Banque : {card.bank} • Réseau : {card.network} •{" "}
+                          {card.cashbackRate != null
+                            ? `Cashback ${(card.cashbackRate * 100).toFixed(
+                                1
+                              )}%`
+                            : "Cashback N/A"}
+                          {card.rewardsPointsRatio != null &&
+                            ` • ${card.rewardsPointsRatio.toFixed(
+                              1
+                            )}x points`}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 text-xs">
+                        <button className="px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-900">
+                          Modifier
+                        </button>
+                        <button className="px-3 py-1 rounded-lg border border-rose-700 text-rose-300 hover:bg-rose-950/40">
+                          Supprimer
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-400">
+                    Aucune carte enregistrée pour le moment.
+                  </p>
+                )}
               </div>
-            </div>
+            )}
           </section>
 
-          {/* FORMULAIRE AJOUT / MODIF */}
+          {/* FORMULAIRE AJOUT / MODIF (toujours statique pour l’instant) */}
           <section
             id="add-card"
             className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-sm"
@@ -132,7 +140,9 @@ export default function CardsPage() {
             </h2>
             <form className="space-y-4">
               <div>
-                <label className="block text-slate-400 mb-1">Nom de la carte</label>
+                <label className="block text-slate-400 mb-1">
+                  Nom de la carte
+                </label>
                 <input
                   type="text"
                   placeholder="Ex. Visa Infinite TD"

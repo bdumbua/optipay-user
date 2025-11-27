@@ -1,40 +1,35 @@
-// app/transactions/page.tsx
 "use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import CardPickerSection from "../components/CardPickerSection";
 import NewTransactionForm from "./NewTransactionForm";
-
-type Transaction = {
-  id: number;
-  userId: number;
-  cardId: number;
-  amountCad: number;
-  mcc: string;
-  country: string;
-  description: string;
-  dateTime: string;
-};
+import AppHeader from "../components/AppHeader";
+import { fetchTransactions } from "@/lib/api";
+import type { Transaction } from "@/types/domain";
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
 
+  // MVP : userId fixe, aligné avec ce qu'on a fait pour les cartes
+  const userId = 1;
+
   useEffect(() => {
-    const fetchTx = async () => {
+    const load = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/transactions");
-        if (!res.ok) throw new Error("Erreur de chargement");
-        const data = await res.json();
+        const data = await fetchTransactions(userId);
         setTransactions(data);
+      } catch (e: any) {
+        setError(e.message ?? "Erreur de chargement");
       } finally {
         setLoading(false);
       }
     };
-    fetchTx();
-  }, []);
+    load();
+  }, [userId]);
 
   const filteredTransactions =
     selectedCardId != null
@@ -44,26 +39,7 @@ export default function TransactionsPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
       {/* HEADER */}
-      <header className="border-b border-slate-800">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-cyan-400 flex items-center justify-center font-bold text-slate-900">
-              O
-            </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-lg">OptiPay</span>
-              <span className="text-xs text-slate-400">
-                La carte virtuelle, propulsée par l’IA
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-slate-400 hidden sm:inline">
-              Transactions
-            </span>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       {/* MAIN */}
       <div className="max-w-6xl mx-auto px-4 py-6 flex gap-6">
@@ -125,6 +101,10 @@ export default function TransactionsPage() {
 
             {loading ? (
               <p className="text-slate-400 text-sm">Chargement...</p>
+            ) : error ? (
+              <p className="text-rose-300 text-sm">
+                Erreur lors du chargement des transactions : {error}
+              </p>
             ) : filteredTransactions.length === 0 ? (
               <p className="text-slate-400 text-sm">
                 Aucune transaction à afficher pour ce filtre.
