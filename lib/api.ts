@@ -25,6 +25,24 @@ export async function fetchCards(userId: number): Promise<Card[]> {
   return apiFetch(`/api/cards?userId=${userId}`);
 }
 
+export type CreateCardPayload = {
+  name: string;
+  bank: string;
+  network: string;
+  cashbackRate?: number | null;
+  rewardsPointsRatio?: number | null;
+};
+
+export async function createCard(
+  userId: number,
+  payload: CreateCardPayload
+): Promise<Card> {
+  return apiFetch(`/api/cards?userId=${userId}`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 // Récupérer les transactions d'un utilisateur
 export async function fetchTransactions(
   userId: number
