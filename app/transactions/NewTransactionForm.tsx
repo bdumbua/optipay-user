@@ -1,4 +1,3 @@
-// app/transactions/NewTransactionForm.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,6 +10,9 @@ type Category =
   | "En ligne / e-commerce"
   | "Voyage"
   | "Autre";
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
 export default function NewTransactionForm() {
   const router = useRouter();
@@ -65,19 +67,22 @@ export default function NewTransactionForm() {
 
       const mcc = mapCategoryToMcc(category);
 
-      await fetch("http://localhost:8080/api/transactions", {
+      await fetch(`${API_BASE_URL}/api/transactions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: 100, // pour l’instant, user fixe
-          // IMPORTANT : on ne choisit pas la carte ici normalement.
-          // Si l’utilisateur a cliqué sur une carte → on envoie cardId
           cardId: selectedCardId ? Number(selectedCardId) : null,
           amountCad: Number(amount),
           mcc,
-          country: country === "Canada" ? "CA" : country === "États-Unis" ? "US" : "OTHER",
+          country:
+            country === "Canada"
+              ? "CA"
+              : country === "États-Unis"
+              ? "US"
+              : "OTHER",
           description: merchant || `${category} - transaction OptiPay`,
           dateTime: dateTimeIso,
         }),
@@ -100,27 +105,36 @@ export default function NewTransactionForm() {
       id="new-transaction"
       className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-sm"
     >
-      <h2 className="text-base font-semibold mb-2">Nouvelle transaction</h2>
+      {/* HEADER + CARTE SÉLECTIONNÉE */}
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold mb-1">
+            Nouvelle transaction
+          </h2>
+          <p className="text-xs text-slate-400 max-w-sm">
+            Renseignez les détails de votre transaction. OptiPay utilisera
+            l&apos;IA pour recommander la meilleure carte.
+          </p>
+        </div>
 
-      {/* Info sur la carte sélectionnée (si applicable) */}
-      <div className="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <p className="text-xs text-slate-400">
-          Renseignez les détails de votre transaction. OptiPay utilisera
-          l’IA pour recommander la meilleure carte.
-        </p>
-        {selectedCardId && selectedCardName ? (
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1">
-            <span className="text-[11px] text-emerald-300">
-              Carte sélectionnée :
-            </span>
-            <span className="text-[11px] font-semibold text-emerald-400">
+        {selectedCardName ? (
+          <div className="shrink-0 rounded-full border border-emerald-500/60 bg-emerald-500/10 px-3 py-2 text-right">
+            <div className="text-[10px] uppercase tracking-wide text-emerald-300">
+              Carte sélectionnée
+            </div>
+            <div className="text-xs font-semibold text-emerald-100">
               {selectedCardName}
-            </span>
+            </div>
           </div>
         ) : (
-          <span className="text-[11px] text-slate-500">
-            Aucune carte imposée • L’IA choisira librement
-          </span>
+          <div className="shrink-0 rounded-full border border-slate-700 bg-slate-950 px-3 py-2 text-right">
+            <div className="text-[10px] uppercase tracking-wide text-slate-500">
+              Carte sélectionnée
+            </div>
+            <div className="text-xs text-slate-400">
+              Aucune – l&apos;IA choisira
+            </div>
+          </div>
         )}
       </div>
 
@@ -211,7 +225,7 @@ export default function NewTransactionForm() {
             disabled={isSubmitting}
             className="px-4 py-2 rounded-xl bg-cyan-400 text-slate-950 text-sm font-medium hover:bg-cyan-300 disabled:opacity-60"
           >
-            {isSubmitting ? "Calcul en cours..." : "Obtenir une recommandation"}
+            {isSubmitting ? "Enregistrement..." : "Obtenir une recommandation"}
           </button>
         </div>
       </form>
