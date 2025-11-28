@@ -33,20 +33,24 @@ export async function fetchTransactions(
   return apiFetch(`/api/transactions?userId=${userId}`);
 }
 
+
+export type RecommendationResult = {
+  recommendedCardId: number | null;
+  reason: string;
+  score?: number | null;
+  alternatives?: { cardId: number; score: number }[];
+};
+
 export async function recommendCard(payload: {
   userId: number;
   amountCad: number;
   mcc: string;
   country: string;
   channel: "ONLINE" | "IN_STORE";
-}): Promise<{
-  recommendedCardId: number;
-  reason: string;
-  score?: number;
-  alternatives?: { cardId: number; score: number }[];
-}> {
-  return apiFetch(`/api/recommendations`, {
+}): Promise<RecommendationResult> {
+  return apiFetch("/api/recommendations", {
     method: "POST",
     body: JSON.stringify(payload),
   });
 }
+

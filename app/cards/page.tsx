@@ -188,7 +188,7 @@ export default function CardsPage() {
           </section>
         </main>
       </div>
-      <AppFooter />
+      <AppFooter/>
     </div>
   );
 }
