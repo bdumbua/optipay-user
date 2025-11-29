@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchCards, createCard } from "@/lib/api";
+import { fetchCards, createCard, updateCard, deleteCard } from "@/lib/api";
 import type { Card } from "@/types/domain";
 import AppLayout from "../components/AppLayout";
+import Alert from "../components/Alert";
 
 type RewardType = "Cashback" | "Points" | "Aucune";
 
@@ -11,6 +12,10 @@ export default function CardsPage() {
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [warningMessage, setWarningMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
 
   // Formulaire ajout
   const [cardName, setCardName] = useState("");
@@ -21,6 +26,8 @@ export default function CardsPage() {
   const [rewardType, setRewardType] = useState<RewardType>("Cashback");
   const [mainRate, setMainRate] = useState(""); // ex. "1" pour 1% ou "4" pour 4x points
   const [savingCard, setSavingCard] = useState(false);
+  const [editingCardId, setEditingCardId] = useState<number | null>(null);
+
 
   const userId = 1; // MVP
 
@@ -52,26 +59,46 @@ export default function CardsPage() {
         }
       }
 
-      const created = await createCard(userId, {
+   if (editingCardId) {
+      const updated = await updateCard(userId, editingCardId, {
         name: cardName,
         bank,
-        network: network.toUpperCase(), // VISA / MASTERCARD / AMEX pour coller au backend
+        network: network.toUpperCase(),
         cashbackRate,
         rewardsPointsRatio,
       });
+      setCards(prev =>
+        prev.map(c => (c.id === editingCardId ? updated : c))
+      );
+    } else {
+      const created = await createCard(userId, {
+        name: cardName,
+        bank,
+        network: network.toUpperCase(),
+        cashbackRate,
+        rewardsPointsRatio,
+      });
+      setCards(prev => [...prev, created]);
+      setSuccessMessage("Carte enregistrée avec succès ✅");
+      setWarningMessage(null);
 
-      // ajouter la carte dans la liste localement
-      setCards((prev) => [...prev, created]);
+      // effacer le message après 4 secondes
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 4000);
 
-      // reset du formulaire (sauf rewardType)
-      setCardName("");
-      setBank("");
-      setMainRate("");
-    } catch (e: any) {
-      setError(e.message ?? "Erreur lors de l'ajout de la carte");
-    } finally {
-      setSavingCard(false);
     }
+
+    // reset
+    setCardName("");
+    setBank("");
+    setMainRate("");
+    setEditingCardId(null);
+  } catch (e: any) {
+    setError(e.message ?? "Erreur lors de l'enregistrement de la carte");
+  } finally {
+    setSavingCard(false);
+  }
   }
 
   return (
@@ -91,6 +118,11 @@ export default function CardsPage() {
           Ajouter une carte
         </a>
       </section>
+      {/* ALERTES GLOBALES */}
+       {successMessage && <Alert kind="success">{successMessage}</Alert>}
+        {warningMessage && <Alert kind="warning">{warningMessage}</Alert>}
+        {errorMessage && <Alert kind="error">{errorMessage}</Alert>}
+
 
       {/* LISTE DES CARTES (dynamique) */}
       <section className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-sm">
@@ -128,12 +160,60 @@ export default function CardsPage() {
                     </div>
                   </div>
                   <div className="flex gap-2 text-xs">
-                    <button className="px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-900">
+                   <button
+                      className="px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-900"
+                      onClick={() => {
+                        setEditingCardId(card.id);
+                        setCardName(card.name);
+                        setBank(card.bank);
+                        setNetwork(
+                          (card.network === "VISA"
+                            ? "Visa"
+                            : card.network === "MASTERCARD"
+                            ? "Mastercard"
+                            : "Amex") as "Visa" | "Mastercard" | "Amex"
+                        );
+                        if (card.cashbackRate != null) {
+                          setRewardType("Cashback");
+                          setMainRate(String(card.cashbackRate * 100));
+                        } else if (card.rewardsPointsRatio != null) {
+                          setRewardType("Points");
+                          setMainRate(String(card.rewardsPointsRatio));
+                        } else {
+                          setRewardType("Aucune");
+                          setMainRate("");
+                        }
+                      }}
+                    >
                       Modifier
                     </button>
-                    <button className="px-3 py-1 rounded-lg border border-rose-700 text-rose-300 hover:bg-rose-950/40">
-                      Supprimer
-                    </button>
+
+                   <button
+                      className="px-3 py-1 rounded-lg border border-rose-700 text-rose-300 hover:bg-rose-950/40"
+                      onClick={async () => {
+                        const confirmDelete = window.confirm(
+                          `Supprimer la carte "${card.name}" ? Cette action est définitive pour le MVP.`
+                        );
+                        if (!confirmDelete) return;
+
+                        try {
+                          await deleteCard(userId, card.id);
+                          setCards((prev) => prev.filter((c) => c.id !== card.id));
+
+                          setSuccessMessage("Carte supprimée avec succès.");
+                          setWarningMessage(null);
+                          setTimeout(() => setSuccessMessage(null), 4000);
+                        } catch (e: any) {
+                          setWarningMessage(
+                            "Erreur lors de la suppression de la carte. Veuillez réessayer."
+                          );
+                          setTimeout(() => setWarningMessage(null), 5000);
+                        }
+                      }}
+                    >
+                  Supprimer
+                </button>
+
                   </div>
                 </div>
               ))

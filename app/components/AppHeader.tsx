@@ -30,8 +30,8 @@ export default function AppHeader({ showGreeting = true }: AppHeaderProps) {
   };
 
   return (
-    <header className="border-b border-slate-800">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
+    <header className="border-b border-slate-800 bg-slate-950">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="h-9 w-9 rounded-xl bg-cyan-400 flex items-center justify-center font-bold text-slate-900">
             O

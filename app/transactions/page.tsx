@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import CardPickerSection from "../components/CardPickerSection";
 import NewTransactionForm from "./NewTransactionForm";
-import { fetchTransactions } from "@/lib/api";
+import { fetchTransactions, deleteTransaction } from "@/lib/api";
 import type { Transaction } from "@/types/domain";
 import AppLayout from "../components/AppLayout";
+import Alert from "../components/Alert";
 import Link from "next/link";
 
 export default function TransactionsPage() {
@@ -13,6 +14,8 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
   // MVP : userId fixe, aligné avec ce qu'on a fait pour les cartes
   const userId = 1;
@@ -83,6 +86,13 @@ export default function TransactionsPage() {
             </div>
           </div>
 
+          {successMessage && (
+            <Alert kind="success">{successMessage}</Alert>
+          )}
+
+          {warningMessage && (
+            <Alert kind="warning">{warningMessage}</Alert>
+          )}
           <button className="mb-3 px-3 py-1 rounded-xl border border-slate-700 text-xs hover:bg-slate-800">
             Synchroniser avec ma banque / Importer CSV
           </button>
@@ -112,8 +122,21 @@ export default function TransactionsPage() {
                       Carte #{tx.cardId} • MCC {tx.mcc} • Pays {tx.country}
                     </div>
                   </div>
-                  <div className="text-xs text-slate-500">
-                    {new Date(tx.dateTime).toLocaleString("fr-CA")}
+                 <div className="flex items-center gap-3 text-xs text-slate-500">
+                    <span>{new Date(tx.dateTime).toLocaleString("fr-CA")}</span>
+                    <button
+                      className="px-2 py-1 rounded-lg border border-rose-700 text-rose-300 hover:bg-rose-950/40"
+                      onClick={async () => {
+                        try {
+                          await deleteTransaction(userId, tx.id);
+                          setTransactions(prev => prev.filter(t => t.id !== tx.id));
+                        } catch (e: any) {
+                          setError(e.message ?? "Erreur lors de la suppression");
+                        }
+                      }}
+                    >
+                      Supprimer
+                    </button>
                   </div>
                 </div>
               ))}
@@ -126,7 +149,9 @@ export default function TransactionsPage() {
           <h2 className="text-base font-semibold mb-3">
             Ajouter une nouvelle transaction
           </h2>
-          <NewTransactionForm />
+          <NewTransactionForm
+                 onTransactionCreated={(tx) => setTransactions((prev) => [...prev, tx])}
+          />
         </section>
       </div>
     </AppLayout>

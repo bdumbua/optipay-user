@@ -1,6 +1,7 @@
+// app/dashboard/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -12,26 +13,48 @@ import {
 } from "recharts";
 import CardPickerSection from "../components/CardPickerSection";
 import AppLayout from "../components/AppLayout";
-
-type SavingsPoint = {
-  cardId: number;
-  cardName: string;
-  saved: number;
-};
+import { fetchOverviewStats } from "@/lib/api";
+import type { OverviewStats } from "@/types/domain";
 
 export default function DashboardPage() {
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
 
-  const savingsData: SavingsPoint[] = [
-    { cardId: 1, cardName: "Visa Infinite TD", saved: 12.3 },
-    { cardId: 2, cardName: "Amex Cobalt", saved: 18.7 },
-    { cardId: 3, cardName: "World Elite MC", saved: 9.4 },
-  ];
+  const [stats, setStats] = useState<OverviewStats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [errorStats, setErrorStats] = useState<string | null>(null);
 
-  const displayedData =
-    selectedCardId != null
-      ? savingsData.filter((s) => s.cardId === selectedCardId)
-      : savingsData;
+  const userId = 1; // MVP
+
+  useEffect(() => {
+    setLoadingStats(true);
+    setErrorStats(null);
+
+    fetchOverviewStats(userId)
+      .then(setStats)
+      .catch((e: any) =>
+        setErrorStats(
+          e?.message ??
+            "Erreur lors du chargement des statistiques. Réessayez plus tard."
+        )
+      )
+      .finally(() => setLoadingStats(false));
+  }, [userId]);
+
+  // Données pour le graphe à partir des stats backend
+  const displayedData = useMemo(() => {
+    if (!stats) return [];
+    let data = stats.byCard.map((c) => ({
+      cardId: c.cardId,
+      cardName: c.cardName,
+      // on affiche le total dépensé par carte pour le moment
+      totalAmount: c.totalAmount,
+      count: c.count,
+    }));
+    if (selectedCardId != null) {
+      data = data.filter((d) => d.cardId === selectedCardId);
+    }
+    return data;
+  }, [stats, selectedCardId]);
 
   return (
     <AppLayout>
@@ -62,6 +85,37 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* PETITES CARTES DE STATS (montant, nb tx, nb cartes) */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div className="text-xs text-slate-400">Montant total</div>
+          <div className="mt-1 text-xl font-semibold">
+            {stats ? `${stats.totalAmount.toFixed(2)} $` : "--"}
+          </div>
+          <div className="text-[11px] text-slate-500 mt-1">
+            Somme de toutes vos transactions
+          </div>
+        </div>
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div className="text-xs text-slate-400">Nombre de transactions</div>
+          <div className="mt-1 text-xl font-semibold">
+            {stats ? stats.totalCount : "--"}
+          </div>
+          <div className="text-[11px] text-slate-500 mt-1">
+            Depuis le début de l&apos;historique
+          </div>
+        </div>
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div className="text-xs text-slate-400">Cartes actives</div>
+          <div className="mt-1 text-xl font-semibold">
+            {stats ? stats.byCard.length : "--"}
+          </div>
+          <div className="text-[11px] text-slate-500 mt-1">
+            Cartes ayant au moins une transaction
+          </div>
+        </div>
+      </section>
+
       {/* CARTES = CONTROLEUR DU GRAPHE */}
       <CardPickerSection
         variant="dashboard"
@@ -70,7 +124,7 @@ export default function DashboardPage() {
 
       {/* GRILLE : recommandations + graphe */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* DERNIÈRES RECOMMANDATIONS */}
+        {/* DERNIÈRES RECOMMANDATIONS (mock pour l'instant) */}
         <section className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-sm">
           <h2 className="text-base font-semibold mb-3">
             Dernières recommandations
@@ -118,10 +172,10 @@ export default function DashboardPage() {
           </ul>
         </section>
 
-        {/* GRAPHE DES ÉCONOMIES PAR CARTE */}
+        {/* GRAPHE DES MONTANTS PAR CARTE (réel) */}
         <section className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-sm">
           <div className="flex items-center justify-between mb-3 gap-2">
-            <h2 className="text-base font-semibold">Économies par carte</h2>
+            <h2 className="text-base font-semibold">Montants par carte</h2>
             <button
               className="px-3 py-1 rounded-xl border border-slate-700 text-xs hover:bg-slate-800"
               onClick={() => setSelectedCardId(null)}
@@ -130,34 +184,53 @@ export default function DashboardPage() {
             </button>
           </div>
 
-          <p className="text-xs text-slate-400 mb-3">
-            Montants économisés estimés par carte sur vos transactions
-            optimisées.
-          </p>
-          <div className="w-full h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={displayedData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#203b1eff" />
-                <XAxis dataKey="cardName" stroke="#94b895ff" />
-                <YAxis
-                  stroke="#94a3b8"
-                  tickFormatter={(v) => `${(v as number).toFixed(1)} $`}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#030303ff",
-                    borderColor: "#1e293b",
-                    fontSize: 12,
-                  }}
-                  formatter={(value: number) => [
-                    `${value.toFixed(2)} $`,
-                    "Économisé",
-                  ]}
-                />
-                <Bar dataKey="saved" radius={[6, 6, 0, 0]} fill="#10b981" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {loadingStats ? (
+            <p className="text-xs text-slate-400">
+              Chargement des statistiques…
+            </p>
+          ) : errorStats ? (
+            <p className="text-xs text-rose-300">{errorStats}</p>
+          ) : !stats || displayedData.length === 0 ? (
+            <p className="text-xs text-slate-400">
+              Aucune transaction enregistrée pour le moment. Ajoutez des
+              transactions pour voir vos statistiques.
+            </p>
+          ) : (
+            <>
+              <p className="text-xs text-slate-400 mb-3">
+                Montants totaux dépensés par carte, basés sur vos transactions
+                enregistrées.
+              </p>
+              <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={displayedData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#203b1e" />
+                    <XAxis dataKey="cardName" stroke="#94a3b8" />
+                    <YAxis
+                      stroke="#94a3b8"
+                      tickFormatter={(v) => `${(v as number).toFixed(0)} $`}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#030712",
+                        borderColor: "#1e293b",
+                        fontSize: 12,
+                      }}
+                      formatter={(value: number) => [
+                        `${value.toFixed(2)} $`,
+                        "Montant total",
+                      ]}
+                    />
+                    <Bar
+                      dataKey="totalAmount"
+                      radius={[6, 6, 0, 0]}
+                      fill="#10b981"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
         </section>
       </div>
 

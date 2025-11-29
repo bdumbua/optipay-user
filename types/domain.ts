@@ -15,7 +15,6 @@ export interface Transaction {
   dateTime: string;
 }
 
-// types/domain.ts
 
 export interface Card {
   id: number;
@@ -27,3 +26,18 @@ export interface Card {
   rewardsPointsRatio: number; // 4.0 = 4x points
   active: boolean;
 }
+
+
+export type CardStats = {
+  cardId: number;
+  cardName: string;
+  totalAmount: number;
+  count: number;
+};
+
+export type OverviewStats = {
+  totalAmount: number;
+  totalCount: number;
+  byCard: CardStats[];
+};
+

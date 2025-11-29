@@ -1,7 +1,9 @@
+// app/transactions/NewTransactionForm.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import type { Transaction } from "@/types/domain";
+import { createTransaction } from "@/lib/api";
 
 type Category =
   | "Épicerie"
@@ -11,12 +13,16 @@ type Category =
   | "Voyage"
   | "Autre";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+type NewTransactionFormProps = {
+  onTransactionCreated?: (tx: Transaction) => void;
+  onError?: (message: string) => void;
+};
 
-export default function NewTransactionForm() {
-  const router = useRouter();
 
+
+export default function NewTransactionForm({
+  onTransactionCreated,
+}: NewTransactionFormProps) {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<Category>("Épicerie");
   const [country, setCountry] = useState("Canada");
@@ -27,8 +33,9 @@ export default function NewTransactionForm() {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [selectedCardName, setSelectedCardName] = useState<string | null>(null);
 
+  const userId = 1; // MVP
+
   useEffect(() => {
-    // Si l’utilisateur a cliqué sur une carte dans CardPickerSection
     const storedCardId = localStorage.getItem("optipay_selected_card_id");
     const storedCardName = localStorage.getItem("optipay_selected_card_name");
 
@@ -59,7 +66,6 @@ export default function NewTransactionForm() {
     setIsSubmitting(true);
 
     try {
-      // Date ISO : si pas de date choisie, on prend maintenant
       const dateTimeIso =
         date && date.length > 0
           ? new Date(date + "T12:00:00").toISOString()
@@ -67,34 +73,32 @@ export default function NewTransactionForm() {
 
       const mcc = mapCategoryToMcc(category);
 
-      await fetch(`${API_BASE_URL}/api/transactions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: 100, // pour l’instant, user fixe
-          cardId: selectedCardId ? Number(selectedCardId) : null,
-          amountCad: Number(amount),
-          mcc,
-          country:
-            country === "Canada"
-              ? "CA"
-              : country === "États-Unis"
-              ? "US"
-              : "OTHER",
-          description: merchant || `${category} - transaction OptiPay`,
-          dateTime: dateTimeIso,
-        }),
+      const created = await createTransaction({
+        userId,
+        cardId: selectedCardId ? Number(selectedCardId) : null,
+        amountCad: Number(amount),
+        mcc,
+        country:
+          country === "Canada"
+            ? "CA"
+            : country === "États-Unis"
+            ? "US"
+            : "OTHER",
+        description: merchant || `${category} - transaction OptiPay`,
+        dateTime: dateTimeIso,
       });
 
-      // reset du formulaire (mais on garde la carte sélectionnée)
+      // 🔥 Remonter la transaction créée au parent (TransactionsPage)
+      if (onTransactionCreated) {
+        onTransactionCreated(created);
+      }
+
+      // reset du formulaire (on garde la carte sélectionnée)
       setAmount("");
       setMerchant("");
       setDate("");
-
-      // recharger la liste
-      router.refresh();
+      setCategory("Épicerie");
+      setCountry("Canada");
     } finally {
       setIsSubmitting(false);
     }
@@ -225,7 +229,7 @@ export default function NewTransactionForm() {
             disabled={isSubmitting}
             className="px-4 py-2 rounded-xl bg-cyan-400 text-slate-950 text-sm font-medium hover:bg-cyan-300 disabled:opacity-60"
           >
-            {isSubmitting ? "Enregistrement..." : "Obtenir une recommandation"}
+            {isSubmitting ? "Enregistrement..." : "Enregistrer la transaction"}
           </button>
         </div>
       </form>

@@ -11,14 +11,12 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col">
-      {/* HEADER */}
+   <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col">
       <AppHeader />
 
-      {/* MAIN CONTAINER */}
       <div className="flex-1">
         <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
-          {/* SIDEBAR */}
+          {/* Sidebar */}
           <aside className="w-60 shrink-0 hidden md:block">
             <AppSidebar />
           </aside>
