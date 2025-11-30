@@ -14,7 +14,9 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+   // messages de feedback
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
   // MVP : userId fixe, aligné avec ce qu'on a fait pour les cartes
@@ -39,6 +41,38 @@ export default function TransactionsPage() {
       ? transactions.filter((tx) => tx.cardId === selectedCardId)
       : transactions;
 
+  async function handleDelete(tx: Transaction) {
+    const ok = window.confirm(
+      `Supprimer la transaction de ${tx.amountCad.toFixed(
+        2
+      )} $ (« ${tx.description} ») ?`
+    );
+    if (!ok) return;
+
+    try {
+      await deleteTransaction(userId, tx.id);
+      // retirer de la liste locale
+      setTransactions((prev) => prev.filter((t) => t.id !== tx.id));
+
+      setSuccessMessage("Transaction supprimée avec succès ✅");
+      setErrorMessage(null);
+      setTimeout(() => setSuccessMessage(null), 4000);
+    } catch (e: any) {
+      setErrorMessage(
+        e.message ?? "Erreur lors de la suppression de la transaction."
+      );
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
+  }
+
+  // Pour quand tu voudras brancher le formulaire sur la liste sans router.refresh
+  function handleTransactionCreated(newTx: Transaction) {
+    setTransactions((prev) => [...prev, newTx]);
+    setSuccessMessage("Transaction ajoutée avec succès ✅");
+    setErrorMessage(null);
+    setTimeout(() => setSuccessMessage(null), 4000);
+  }
+
   return (
     <AppLayout>
       {/* HEADER SECTION */}
@@ -56,7 +90,9 @@ export default function TransactionsPage() {
           Simuler une recommandation
         </Link>
       </section>
-
+      {/* ALERTES GLOBALES */}
+          {successMessage && <Alert kind="success">{successMessage}</Alert>}
+          {errorMessage && <Alert kind="error">{errorMessage}</Alert>}
       {/* FILTRE PAR CARTE */}
       <CardPickerSection
         variant="transactions"
@@ -85,14 +121,7 @@ export default function TransactionsPage() {
               </button>
             </div>
           </div>
-
-          {successMessage && (
-            <Alert kind="success">{successMessage}</Alert>
-          )}
-
-          {warningMessage && (
-            <Alert kind="warning">{warningMessage}</Alert>
-          )}
+          
           <button className="mb-3 px-3 py-1 rounded-xl border border-slate-700 text-xs hover:bg-slate-800">
             Synchroniser avec ma banque / Importer CSV
           </button>

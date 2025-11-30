@@ -23,7 +23,17 @@ export default function DashboardPage() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [errorStats, setErrorStats] = useState<string | null>(null);
 
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
   const userId = 1; // MVP
+
+  // Récupérer l'email stocké par la page de login / register
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedEmail = localStorage.getItem("optipay_user_email");
+      setUserEmail(storedEmail);
+    }
+  }, []);
 
   useEffect(() => {
     setLoadingStats(true);
@@ -68,6 +78,13 @@ export default function DashboardPage() {
             Ajoutez vos cartes et laissez l’IA choisir la meilleure pour chaque
             paiement.
           </p>
+          {userEmail && (
+            <p className="text-xs text-slate-500 mt-1">
+              Connecté en tant que{" "}
+              <span className="text-slate-200 font-medium">{userEmail}</span>
+              {" "}• Version MVP (données de démonstration)
+            </p>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <a

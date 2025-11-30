@@ -7,7 +7,7 @@ import { AuthFooter } from "../components/AuthFooter";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -16,12 +16,8 @@ export default function LoginPage() {
     e.preventDefault();
     const form = e.currentTarget;
     const emailInput = form.elements.namedItem("email") as HTMLInputElement | null;
-    const passwordInput = form.elements.namedItem("password") as HTMLInputElement | null;
-
     const email = emailInput?.value.trim() || "";
-    const password = passwordInput?.value || "";
 
-    // Validation format email
     if (!emailRegex.test(email)) {
       setEmailError("Veuillez saisir une adresse email valide.");
       return;
@@ -29,22 +25,16 @@ export default function LoginPage() {
       setEmailError("");
     }
 
-    // (Tu peux ajouter d'autres validations si besoin)
-    if (!password) {
-      // on pourrait afficher un message, mais pour l’instant on laisse simple
-    }
-
-    // stocker l'email du "user"
     if (email) {
       localStorage.setItem("optipay_user_email", email);
     }
 
+    // Pour le MVP, on redirige directement vers le dashboard
     router.push("/dashboard");
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-50">
-      {/* Zone centrale avec la carte de login */}
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 mx-4">
           {/* Logo + titre */}
@@ -55,7 +45,7 @@ export default function LoginPage() {
             <div className="flex flex-col">
               <span className="font-semibold text-lg">OptiPay</span>
               <span className="text-xs text-slate-400">
-                La meilleure carte, à chaque paiement
+                Crée ton compte OptiPay
               </span>
               <p className="text-xs text-slate-500">
                 (Aperçu UI - Version Beta.)
@@ -63,10 +53,19 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <h1 className="text-lg font-semibold">Connexion</h1>
+          <h1 className="text-lg font-semibold">Créer un compte</h1>
 
-          {/* Formulaire */}
           <form className="space-y-4 text-sm" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-slate-400 mb-1">Nom complet</label>
+              <input
+                type="text"
+                name="fullName"
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                placeholder="Votre nom"
+              />
+            </div>
+
             <div>
               <label className="block text-slate-400 mb-1">Adresse email</label>
               <input
@@ -101,48 +100,27 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500" />
-              <Link
-                href="/forgot-password"
-                className="text-cyan-300 hover:underline"
-              >
-                Mot de passe oublié ?
-              </Link>
-            </div>
-
             <button
               type="submit"
               className="w-full mt-1 px-4 py-2 rounded-xl bg-cyan-400 text-slate-950 text-sm font-medium hover:bg-cyan-300"
             >
-              Se connecter
+              Créer mon compte
             </button>
 
             <p className="text-xs text-slate-400 text-center">
-              Pas encore de compte ?{" "}
-              <Link href="/register" className="text-cyan-300 hover:underline">
-                Créer un compte
+              Déjà un compte ?{" "}
+              <Link href="/login" className="text-cyan-300 hover:underline">
+                Se connecter
               </Link>
             </p>
           </form>
 
           <p className="text-xs text-slate-500">
-            (Pour le MVP, vous pouvez accéder directement au tableau de bord sans
-            authentification réelle.)
+            (Pour le MVP, la création de compte est fictive et redirige vers le tableau de bord.)
           </p>
-
-          <div className="pt-2">
-            <Link
-              href="/dashboard"
-              className="text-xs text-cyan-300 hover:underline"
-            >
-              Continuer vers le tableau de bord
-            </Link>
-          </div>
         </div>
       </div>
 
-      {/* Footer spécifique login, style AppFooter */}
       <AuthFooter />
     </div>
   );
