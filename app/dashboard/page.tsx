@@ -51,20 +51,33 @@ export default function DashboardPage() {
   }, [userId]);
 
   // Données pour le graphe à partir des stats backend
+  // + gain estimé par carte (MVP : 1,5 % du montant total)
   const displayedData = useMemo(() => {
     if (!stats) return [];
-    let data = stats.byCard.map((c) => ({
-      cardId: c.cardId,
-      cardName: c.cardName,
-      // on affiche le total dépensé par carte pour le moment
-      totalAmount: c.totalAmount,
-      count: c.count,
-    }));
+    const DEFAULT_REWARD_RATE = 0.015; // 1,5 % de cash-back moyen (MVP)
+
+    let data = stats.byCard.map((c) => {
+      const estimatedGain = c.totalAmount * DEFAULT_REWARD_RATE;
+
+      return {
+        cardId: c.cardId,
+        cardName: c.cardName,
+        totalAmount: c.totalAmount,
+        count: c.count,
+        estimatedGain, // nouveau champ pour le gain estimé
+      };
+    });
+
     if (selectedCardId != null) {
       data = data.filter((d) => d.cardId === selectedCardId);
     }
     return data;
   }, [stats, selectedCardId]);
+
+  // Gain total agrégé pour le petit résumé
+  const totalEstimatedGain = useMemo(() => {
+    return displayedData.reduce((sum, d) => sum + d.estimatedGain, 0);
+  }, [displayedData]);
 
   return (
     <AppLayout>
@@ -103,7 +116,7 @@ export default function DashboardPage() {
       </section>
 
       {/* PETITES CARTES DE STATS (montant, nb tx, nb cartes) */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+      <section className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-sm">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
           <div className="text-xs text-slate-400">Montant total</div>
           <div className="mt-1 text-xl font-semibold">
@@ -129,6 +142,17 @@ export default function DashboardPage() {
           </div>
           <div className="text-[11px] text-slate-500 mt-1">
             Cartes ayant au moins une transaction
+          </div>
+        </div>
+        <div className="bg-slate-900 border border-emerald-600/40 rounded-2xl p-4">
+          <div className="text-xs text-emerald-300">
+            Gain estimé (toutes cartes)
+          </div>
+          <div className="mt-1 text-xl font-semibold text-emerald-200">
+            {stats ? `${totalEstimatedGain.toFixed(2)} $` : "--"}
+          </div>
+          <div className="text-[11px] text-emerald-400/80 mt-1">
+            Basé sur un taux moyen de récompenses de 1,5 % (MVP)
           </div>
         </div>
       </section>
@@ -189,10 +213,10 @@ export default function DashboardPage() {
           </ul>
         </section>
 
-        {/* GRAPHE DES MONTANTS PAR CARTE (réel) */}
+        {/* GRAPHE DES MONTANTS PAR CARTE + tableau des gains estimés */}
         <section className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-sm">
           <div className="flex items-center justify-between mb-3 gap-2">
-            <h2 className="text-base font-semibold">Montants par carte</h2>
+            <h2 className="text-base font-semibold">Montants & gains par carte</h2>
             <button
               className="px-3 py-1 rounded-xl border border-slate-700 text-xs hover:bg-slate-800"
               onClick={() => setSelectedCardId(null)}
@@ -215,8 +239,9 @@ export default function DashboardPage() {
           ) : (
             <>
               <p className="text-xs text-slate-400 mb-3">
-                Montants totaux dépensés par carte, basés sur vos transactions
-                enregistrées.
+                Montants totaux dépensés par carte, et gain estimé basé sur un
+                taux moyen de récompenses. Dans la version finale, cette section
+                utilisera vos vrais cashbacks, points et frais optimisés.
               </p>
               <div className="w-full h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -245,6 +270,33 @@ export default function DashboardPage() {
                     />
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+
+              {/* Petit tableau des gains estimés par carte */}
+              <div className="mt-4 border border-slate-800 rounded-xl overflow-hidden">
+                <div className="grid grid-cols-3 text-[11px] font-medium bg-slate-950/60 text-slate-300 px-3 py-2">
+                  <div>Carte</div>
+                  <div className="text-right">Montant total</div>
+                  <div className="text-right text-emerald-300">
+                    Gain estimé (MVP)
+                  </div>
+                </div>
+                <div className="divide-y divide-slate-800 text-[11px]">
+                  {displayedData.map((c) => (
+                    <div
+                      key={c.cardId}
+                      className="grid grid-cols-3 px-3 py-1.5 text-slate-300"
+                    >
+                      <div>{c.cardName}</div>
+                      <div className="text-right">
+                        {c.totalAmount.toFixed(2)} $
+                      </div>
+                      <div className="text-right text-emerald-300">
+                        {c.estimatedGain.toFixed(2)} $
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </>
           )}
