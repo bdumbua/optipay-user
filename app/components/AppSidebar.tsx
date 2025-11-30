@@ -48,7 +48,7 @@ export default function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden md:flex w-56 flex-col gap-2 text-sm">
+    <nav className="flex flex-col gap-2 text-sm">
       <div className="text-xs uppercase text-slate-500 mb-1">
         Navigation
       </div>
