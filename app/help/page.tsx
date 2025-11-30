@@ -36,7 +36,21 @@ export default function HelpPage() {
               2. Entrez vos transactions.
             </span>
             <p className="text-slate-400">
-              Dans <span className="text-cyan-300">Transactions</span>, ajoutez un paiement pour que l’IA puisse apprendre.
+              Dans <span className="text-cyan-300">Transactions</span>, vous pouvez ajouter un paiement manuellement
+              pour que l’IA puisse apprendre de vos habitudes.
+            </p>
+          </li>
+
+          <li>
+            <span className="font-medium text-slate-100">
+              2 bis. Importez un relevé CSV par carte.
+            </span>
+            <p className="text-slate-400">
+              Toujours dans <span className="text-cyan-300">Transactions</span>, sélectionnez d&apos;abord une{" "}
+              <span className="font-medium">carte</span> dans le filtre en haut de la page. Ensuite, utilisez la
+              section <span className="text-cyan-300">Importer un relevé bancaire (CSV)</span> pour charger
+              un fichier correspondant à cette carte. Les transactions importées seront rattachées à la carte
+              actuellement sélectionnée, comme l&apos;historique affiché.
             </p>
           </li>
 
@@ -71,7 +85,52 @@ export default function HelpPage() {
               OptiPay utilise-t-il mes données bancaires ?
             </h3>
             <p className="text-slate-400">
-              Non. Pour le moment, tout est manuel. Plus tard, l’intégration open banking sera proposée.
+              Non. Pour le moment, tout est manuel ou basé sur des fichiers CSV chargés par vous.
+              Plus tard, l’intégration open banking sera proposée.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-medium text-slate-100">
+              Puis-je importer mes transactions depuis un fichier CSV ?
+            </h3>
+            <p className="text-slate-400">
+              Oui. Sur la page <span className="text-cyan-300">Transactions</span>, vous pouvez importer un relevé
+              au format CSV pour une carte donnée. Sélectionnez d&apos;abord la carte dans le filtre, puis utilisez
+              la section <span className="text-cyan-300">Importer un relevé bancaire (CSV)</span>.
+            </p>
+            <p className="text-slate-400 mt-1">
+              Le format minimal recommandé est :
+            </p>
+            <p className="text-slate-300 text-xs mt-1">
+              <code className="bg-slate-950 border border-slate-800 rounded px-2 py-1">
+                date, description, montant, devise
+              </code>
+            </p>
+            <ul className="list-disc list-inside text-xs text-slate-400 mt-2 space-y-1">
+              <li>
+                <span className="font-medium text-slate-300">date</span> : au format{" "}
+                <code className="bg-slate-950 border border-slate-800 rounded px-1">
+                  YYYY-MM-DD
+                </code>{" "}
+                (ou avec heure :{" "}
+                <code className="bg-slate-950 border border-slate-800 rounded px-1">
+                  YYYY-MM-DD HH:MM
+                </code>
+                ).
+              </li>
+              <li>
+                <span className="font-medium text-slate-300">montant</span> : nombre avec un point comme
+                séparateur décimal, par exemple <code>123.45</code>.
+              </li>
+              <li>
+                <span className="font-medium text-slate-300">devise</span> : par exemple{" "}
+                <code>CAD</code>, <code>USD</code>, etc.
+              </li>
+            </ul>
+            <p className="text-xs text-slate-500 mt-2">
+              Dans cette version MVP, l&apos;import CSV est surtout une aide à la saisie : certains traitements
+              avancés seront ajoutés plus tard.
             </p>
           </div>
 
@@ -80,7 +139,8 @@ export default function HelpPage() {
               Comment l’IA choisit-elle la meilleure carte ?
             </h3>
             <p className="text-slate-400">
-              Une combinaison d’un moteur de règles optimisées et d’un modèle d’apprentissage automatique.
+              Une combinaison d’un moteur de règles optimisées et d’un modèle d’apprentissage automatique,
+              entraîné à partir de vos transactions et des caractéristiques de vos cartes.
             </p>
           </div>
 
